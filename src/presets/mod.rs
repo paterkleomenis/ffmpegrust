@@ -67,11 +67,7 @@ impl PresetManager {
     }
 
     fn get_custom_presets_path() -> Option<PathBuf> {
-        if let Some(config_dir) = dirs::config_dir() {
-            Some(config_dir.join("ffmpegrust").join("presets.json"))
-        } else {
-            None
-        }
+        dirs::config_dir().map(|config_dir| config_dir.join("ffmpegrust").join("presets.json"))
     }
 
     fn load_builtin_presets(&mut self) {

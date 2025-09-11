@@ -1,15 +1,18 @@
 use anyhow::{anyhow, Result};
 use semver::Version;
 use serde::{Deserialize, Serialize};
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use std::process::Command;
 use tempfile::NamedTempFile;
 use tokio::fs;
 use tokio::io::AsyncWriteExt;
 use tracing::info;
 
+#[allow(dead_code)]
 const GITHUB_API_BASE: &str = "https://api.github.com/repos";
+#[allow(dead_code)]
 const REPO_OWNER: &str = "paterkleomenis";
+#[allow(dead_code)]
 const REPO_NAME: &str = "ffmpegrust";
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -297,7 +300,7 @@ del "%~f0"
     #[cfg(any(target_os = "macos", target_os = "linux"))]
     async fn install_unix_update(
         &self,
-        archive_path: &PathBuf,
+        archive_path: &Path,
         install_dir: &std::path::Path,
     ) -> Result<()> {
         // Extract the archive

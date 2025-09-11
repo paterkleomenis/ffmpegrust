@@ -2,24 +2,18 @@ use crate::conversion::{ConversionMode, ConversionSettings};
 use crate::ffmpeg_installer::{FFmpegInstaller, InstallStatus};
 use crate::updater::{AutoUpdater, UpdateInfo, UpdateStatus};
 use eframe::egui;
-use serde_json;
 use std::path::PathBuf;
 use std::process::Command;
 use std::sync::mpsc;
 use std::thread;
 use std::time::SystemTime;
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Default)]
 pub enum ActiveTab {
+    #[default]
     Basic,
     Advanced,
     Progress,
-}
-
-impl Default for ActiveTab {
-    fn default() -> Self {
-        ActiveTab::Basic
-    }
 }
 
 pub struct FFmpegApp {
@@ -47,7 +41,7 @@ pub struct FFmpegApp {
 }
 
 #[derive(Debug)]
-enum ConversionMessage {
+pub enum ConversionMessage {
     Progress(f32),
     Completed,
     Error(String),
@@ -132,7 +126,7 @@ impl FFmpegApp {
 
     pub fn select_output_file(&mut self) {
         if let Some(path) = rfd::FileDialog::new()
-            .set_file_name(&format!("output.{}", self.settings.container))
+            .set_file_name(format!("output.{}", self.settings.container))
             .save_file()
         {
             self.output_file = Some(path);
@@ -201,26 +195,24 @@ impl FFmpegApp {
             } else {
                 output.clone()
             }
-        } else {
-            if let Some(parent) = input_file.parent() {
-                if let Some(stem) = input_file.file_stem() {
-                    let suffix = match self.settings.mode {
-                        ConversionMode::Remux => "_remux",
-                        ConversionMode::Convert => "_converted",
-                    };
-                    let filename = format!(
-                        "{}{}.{}",
-                        stem.to_string_lossy(),
-                        suffix,
-                        self.settings.container
-                    );
-                    parent.join(filename)
-                } else {
-                    return;
-                }
+        } else if let Some(parent) = input_file.parent() {
+            if let Some(stem) = input_file.file_stem() {
+                let suffix = match self.settings.mode {
+                    ConversionMode::Remux => "_remux",
+                    ConversionMode::Convert => "_converted",
+                };
+                let filename = format!(
+                    "{}{}.{}",
+                    stem.to_string_lossy(),
+                    suffix,
+                    self.settings.container
+                );
+                parent.join(filename)
             } else {
                 return;
             }
+        } else {
+            return;
         };
 
         let settings = self.settings.clone();

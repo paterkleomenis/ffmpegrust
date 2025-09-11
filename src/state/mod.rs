@@ -4,7 +4,9 @@ use std::time::Instant;
 use uuid::Uuid;
 
 #[derive(Debug, Clone, PartialEq)]
+#[derive(Default)]
 pub enum AppState {
+    #[default]
     Idle,
     Converting {
         task_id: Uuid,
@@ -25,11 +27,6 @@ pub enum AppState {
     },
 }
 
-impl Default for AppState {
-    fn default() -> Self {
-        AppState::Idle
-    }
-}
 
 impl AppState {
     pub fn is_idle(&self) -> bool {
@@ -120,6 +117,7 @@ impl AppState {
 }
 
 #[derive(Debug, Clone)]
+#[derive(Default)]
 pub struct AppData {
     pub input_file: Option<PathBuf>,
     pub output_file: Option<PathBuf>,
@@ -129,18 +127,6 @@ pub struct AppData {
     pub progress_changed: bool,
 }
 
-impl Default for AppData {
-    fn default() -> Self {
-        Self {
-            input_file: None,
-            output_file: None,
-            settings: ConversionSettings::default(),
-            state: AppState::default(),
-            error_message: None,
-            progress_changed: false,
-        }
-    }
-}
 
 impl AppData {
     pub fn new() -> Self {

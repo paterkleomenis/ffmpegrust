@@ -1,7 +1,7 @@
 use crate::conversion::ConversionTask;
 use crate::events::{AppEvent, EventSender};
 use std::collections::HashMap;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use std::sync::Arc;
 use tokio::sync::RwLock;
 use uuid::Uuid;
@@ -117,7 +117,7 @@ impl ResourceManager {
         }
     }
 
-    pub async fn check_disk_space(&self, output_path: &PathBuf) -> Result<bool, std::io::Error> {
+    pub async fn check_disk_space(&self, output_path: &Path) -> Result<bool, std::io::Error> {
         // Check available disk space
         if let Some(parent) = output_path.parent() {
             // This is a simplified check - in production you'd use a proper disk space check

@@ -132,16 +132,11 @@ impl Default for ConversionSettings {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize)]
+#[derive(Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize, Default)]
 pub enum ConversionMode {
+    #[default]
     Convert,
     Remux,
-}
-
-impl Default for ConversionMode {
-    fn default() -> Self {
-        ConversionMode::Convert
-    }
 }
 
 #[derive(Debug, Clone)]
@@ -329,7 +324,7 @@ impl ConversionTask {
         let task_id = self.id;
 
         tokio::spawn(async move {
-            let _ = tx.send(ConversionStatus::Starting);
+            std::mem::drop(tx.send(ConversionStatus::Starting));
 
             // Start FFmpeg process
             let mut child = match Command::new("ffmpeg")
@@ -407,30 +402,26 @@ impl ConversionTask {
             let mut line = String::new();
             let progress_parser = ProgressParser::new(duration, total_frames);
 
-            loop {
-                match reader.read_line(&mut line).await {
-                    Ok(bytes_read) => {
-                        if bytes_read == 0 {
-                            break; // End of stream
-                        }
-
-                        // Check for cancellation
-                        let cancelled = {
-                            let guard = cancel_flag.lock().unwrap_or_else(|e| e.into_inner());
-                            *guard
-                        };
-                        if cancelled {
-                            break;
-                        }
-
-                        if let Some(progress) = progress_parser.parse_line(&line) {
-                            let _ = tx.send(ConversionStatus::InProgress(progress)).await;
-                        }
-
-                        line.clear();
-                    }
-                    Err(_) => break,
+            while let Ok(bytes_read) = reader.read_line(&mut line).await {
+                if bytes_read == 0 {
+                    break; // End of stream
                 }
+
+                // Check for cancellation
+                let cancelled = {
+                    let guard = cancel_flag.lock().unwrap_or_else(|e| e.into_inner());
+                    *guard
+                };
+                if cancelled {
+                    break;
+                }
+
+                // Parse progress and send update
+                if let Some(progress) = progress_parser.parse_line(&line) {
+                    let _ = tx.send(ConversionStatus::InProgress(progress));
+                }
+
+                line.clear();
             }
 
             // Cancel the cancellation monitoring task
@@ -524,8 +515,10 @@ impl ProgressParser {
             return None;
         }
 
-        let mut progress = ConversionProgress::default();
-        progress.total_frames = self.total_frames;
+        let mut progress = ConversionProgress {
+            total_frames: self.total_frames,
+            ..Default::default()
+        };
 
         if let Some(caps) = self.frame_regex.captures(line) {
             progress.current_frame = caps[1].parse().unwrap_or(0);
@@ -563,7 +556,7 @@ impl ProgressParser {
 
             // Calculate percentage based on duration or frame count
             if let Some(duration) = self.duration_seconds {
-                progress.percentage = ((total_seconds / duration) * 100.0).min(100.0).max(0.0);
+                progress.percentage = ((total_seconds / duration) * 100.0).clamp(0.0, 100.0);
 
                 // Calculate ETA
                 if progress.speed > 0.0 && total_seconds > 0.0 {
@@ -576,8 +569,7 @@ impl ProgressParser {
                 if total_frames > 0 {
                     progress.percentage = ((progress.current_frame as f32 / total_frames as f32)
                         * 100.0)
-                        .min(100.0)
-                        .max(0.0);
+                        .clamp(0.0, 100.0);
                 }
             }
         }

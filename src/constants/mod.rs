@@ -1,25 +1,43 @@
+// UI constants for future interface improvements
+#[allow(dead_code)]
 pub const UI_UPDATE_INTERVAL_MS: u64 = 250;
+#[allow(dead_code)]
 pub const DEFAULT_WINDOW_SIZE: [f32; 2] = [900.0, 700.0];
+#[allow(dead_code)]
 pub const MIN_WINDOW_SIZE: [f32; 2] = [800.0, 600.0];
+#[allow(dead_code)]
 pub const PROGRESS_BUFFER_SIZE: usize = 1024;
 
-// UI Styling Constants
+// UI Styling Constants for future themes
+#[allow(dead_code)]
 pub const HEADER_HEIGHT: f32 = 80.0;
+#[allow(dead_code)]
 pub const CARD_PADDING: f32 = 20.0;
+#[allow(dead_code)]
 pub const CARD_SPACING: f32 = 15.0;
+#[allow(dead_code)]
 pub const CARD_ROUNDING: f32 = 10.0;
+#[allow(dead_code)]
 pub const BUTTON_PADDING: [f32; 2] = [12.0, 8.0];
+#[allow(dead_code)]
 pub const TAB_BUTTON_PADDING: [f32; 2] = [25.0, 15.0];
+#[allow(dead_code)]
 pub const ITEM_SPACING: [f32; 2] = [10.0, 10.0];
 
-// Colors
+// Color constants for future themes
+#[allow(dead_code)]
 pub const WINDOW_BG_COLOR: u8 = 20;
+#[allow(dead_code)]
 pub const PANEL_BG_COLOR: u8 = 25;
+#[allow(dead_code)]
 pub const CARD_BG_COLOR: u8 = 30;
+#[allow(dead_code)]
 pub const CARD_BORDER_COLOR: u8 = 45;
+#[allow(dead_code)]
 pub const HEADER_BG_COLOR: u8 = 15;
 
-// Default codec options
+// Codec options for future preset system
+#[allow(dead_code)]
 pub const DEFAULT_CODECS: &[(&str, &str)] = &[
     ("libx264", "H.264 (x264)"),
     ("libx265", "H.265/HEVC (x265)"),
@@ -28,6 +46,7 @@ pub const DEFAULT_CODECS: &[(&str, &str)] = &[
     ("copy", "Copy (No Re-encoding)"),
 ];
 
+#[allow(dead_code)]
 pub const AUDIO_CODECS: &[(&str, &str)] = &[
     ("aac", "AAC"),
     ("libmp3lame", "MP3"),
@@ -44,6 +63,7 @@ pub const AUDIO_CODECS: &[(&str, &str)] = &[
     ("copy", "Copy (No Re-encoding)"),
 ];
 
+#[allow(dead_code)]
 pub const CONTAINER_FORMATS: &[(&str, &str)] = &[
     ("mp4", "MP4"),
     ("mkv", "MKV"),
@@ -55,6 +75,7 @@ pub const CONTAINER_FORMATS: &[(&str, &str)] = &[
     ("wmv", "WMV"),
 ];
 
+#[allow(dead_code)]
 pub const QUALITY_PRESETS: &[(&str, &str)] = &[
     ("18", "Lossless (18)"),
     ("20", "Very High (20)"),
@@ -64,23 +85,31 @@ pub const QUALITY_PRESETS: &[(&str, &str)] = &[
     ("35", "Very Low (35)"),
 ];
 
-// FFmpeg process constants
+// FFmpeg process constants for future timeout handling
+#[allow(dead_code)]
 pub const FFMPEG_TIMEOUT_SECONDS: u64 = 3600; // 1 hour max
+#[allow(dead_code)]
 pub const PROGRESS_UPDATE_INTERVAL_MS: u64 = 100;
+#[allow(dead_code)]
 pub const CANCELLATION_CHECK_INTERVAL_MS: u64 = 100;
 
-// File extensions for video files
+// File handling constants for validation
+#[allow(dead_code)]
 pub const VIDEO_EXTENSIONS: &[&str] = &[
     "mp4", "avi", "mkv", "mov", "wav", "wmv", "flv", "webm", "m4v", "3gp", "ts", "mts", "m2ts",
     "vob", "ogv",
 ];
 
-// Resource limits
+// System resource constants
+#[allow(dead_code)]
 pub const MAX_CONCURRENT_CONVERSIONS: usize = 2;
+#[allow(dead_code)]
 pub const DISK_SPACE_THRESHOLD_MB: u64 = 1024; // 1GB minimum free space
+#[allow(dead_code)]
 pub const MAX_LOG_LINES: usize = 1000;
 
-// Remux format compatibility matrix
+// Format compatibility for smart remuxing
+#[allow(dead_code)]
 pub const REMUX_COMPATIBLE_FORMATS: &[(&str, &[&str])] = &[
     ("mp4", &["mov", "mkv", "avi"]),
     ("mov", &["mp4", "mkv", "avi"]),
@@ -90,7 +119,8 @@ pub const REMUX_COMPATIBLE_FORMATS: &[(&str, &[&str])] = &[
     ("flv", &["mp4", "mov"]),
 ];
 
-// Container-specific codec recommendations
+// Container codec recommendations for presets
+#[allow(dead_code)]
 pub const CONTAINER_CODEC_RECOMMENDATIONS: &[(&str, &[&str], &[&str])] = &[
     (
         "mp4",
@@ -116,7 +146,8 @@ pub const CONTAINER_CODEC_RECOMMENDATIONS: &[(&str, &[&str], &[&str])] = &[
     ("avi", &["libx264", "copy"], &["mp3", "pcm_s16le", "copy"]),
 ];
 
-// Fast remux presets
+// Quick remux presets for future feature
+#[allow(dead_code)]
 pub const REMUX_PRESETS: &[(&str, &str)] = &[
     ("Fast MP4", "mp4"),
     ("Fast MOV", "mov"),

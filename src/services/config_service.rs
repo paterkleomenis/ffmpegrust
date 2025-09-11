@@ -38,11 +38,7 @@ impl ConfigService {
     }
 
     fn get_config_path() -> Option<PathBuf> {
-        if let Some(config_dir) = dirs::config_dir() {
-            Some(config_dir.join("ffmpegrust").join("config.json"))
-        } else {
-            None
-        }
+        dirs::config_dir().map(|config_dir| config_dir.join("ffmpegrust").join("config.json"))
     }
 
     pub async fn load_config(&self) -> Result<AppConfig, ConfigError> {
@@ -230,12 +226,12 @@ impl ConfigService {
 
     pub async fn get_last_input_dir(&self) -> Option<PathBuf> {
         let config = self.config.read().await;
-        config.last_input_dir.as_ref().map(|s| PathBuf::from(s))
+        config.last_input_dir.as_ref().map(PathBuf::from)
     }
 
     pub async fn get_last_output_dir(&self) -> Option<PathBuf> {
         let config = self.config.read().await;
-        config.last_output_dir.as_ref().map(|s| PathBuf::from(s))
+        config.last_output_dir.as_ref().map(PathBuf::from)
     }
 
     pub async fn export_config(&self, path: &std::path::Path) -> Result<(), ConfigError> {

@@ -28,15 +28,13 @@ pub struct SecurityValidator {
 
 impl SecurityValidator {
     pub fn new() -> Self {
-        let mut injection_patterns = Vec::new();
-
-        // Common command injection patterns
-        injection_patterns.push(Regex::new(r"[;&|`$]").unwrap()); // Shell metacharacters
-        injection_patterns.push(Regex::new(r"\$\([^)]*\)").unwrap()); // Command substitution
-        injection_patterns.push(Regex::new(r"`[^`]*`").unwrap()); // Backtick command substitution
-        injection_patterns.push(Regex::new(r"\.\./").unwrap()); // Directory traversal
-        injection_patterns.push(Regex::new(r"\\x[0-9a-fA-F]{2}").unwrap()); // Hex encoding
-        injection_patterns.push(Regex::new(r"%[0-9a-fA-F]{2}").unwrap()); // URL encoding
+        let injection_patterns = vec![
+            Regex::new(r"[;&|`$]").unwrap(),              // Shell metacharacters
+            Regex::new(r"[\x00-\x1f\x7f-\x9f]").unwrap(), // Control chars
+            Regex::new(r"\.\.").unwrap(),                 // Directory traversal
+            Regex::new(r"\\x[0-9a-fA-F]{2}").unwrap(),    // Hex encoding
+            Regex::new(r"%[0-9a-fA-F]{2}").unwrap(),      // URL encoding
+        ];
 
         let mut disallowed_args = HashSet::new();
 
@@ -184,16 +182,15 @@ impl SecurityValidator {
         use_hardware_accel: bool,
         is_remux: bool,
     ) -> Result<Vec<String>, SecurityError> {
-        let mut args = Vec::new();
-
-        // Basic FFmpeg arguments (these are safe)
-        args.push("-nostdin".to_string());
-        args.push("-y".to_string()); // Overwrite output files
-        args.push("-hide_banner".to_string());
-        args.push("-loglevel".to_string());
-        args.push("info".to_string());
-        args.push("-progress".to_string());
-        args.push("pipe:1".to_string());
+        let mut args = vec![
+            "-nostdin".to_string(),
+            "-y".to_string(), // overwrite output files
+            "-hide_banner".to_string(),
+            "-loglevel".to_string(),
+            "info".to_string(),
+            "-progress".to_string(),
+            "pipe:1".to_string(),
+        ];
 
         // Hardware acceleration (if requested)
         if use_hardware_accel {
