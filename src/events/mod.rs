@@ -23,7 +23,7 @@ pub enum AppEvent {
         task_id: Uuid,
         error: String,
     },
-    ConversionCancelled(Uuid),
+    ConversionCancelled(()),
 
     // UI events
     TabChanged(crate::app::ActiveTab),

@@ -12,7 +12,9 @@ use std::time::SystemTime;
 pub enum ActiveTab {
     #[default]
     Basic,
+    #[allow(dead_code)]
     Advanced,
+    #[allow(dead_code)]
     Progress,
 }
 
@@ -20,6 +22,7 @@ pub struct FFmpegApp {
     pub input_file: Option<PathBuf>,
     pub output_file: Option<PathBuf>,
     pub settings: ConversionSettings,
+    #[allow(dead_code)]
     pub active_tab: ActiveTab,
     pub is_converting: bool,
     pub progress: f32,
@@ -769,30 +772,37 @@ impl FFmpegApp {
             });
     }
 
+    #[allow(dead_code)]
     pub fn get_input_file(&self) -> Option<&PathBuf> {
         self.input_file.as_ref()
     }
 
+    #[allow(dead_code)]
     pub fn get_output_file(&self) -> Option<&PathBuf> {
         self.output_file.as_ref()
     }
 
+    #[allow(dead_code)]
     pub fn get_settings(&self) -> &ConversionSettings {
         &self.settings
     }
 
+    #[allow(dead_code)]
     pub fn get_settings_mut(&mut self) -> &mut ConversionSettings {
         &mut self.settings
     }
 
+    #[allow(dead_code)]
     pub fn get_error(&self) -> Option<&String> {
         self.error.as_ref()
     }
 
+    #[allow(dead_code)]
     pub fn get_progress(&self) -> f32 {
         self.progress
     }
 
+    #[allow(dead_code)]
     pub fn get_state(&self) -> serde_json::Value {
         serde_json::json!({
             "input_file": self.input_file.as_ref().map(|p| p.to_string_lossy()),

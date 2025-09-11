@@ -2,6 +2,16 @@ use regex::Regex;
 use std::collections::HashSet;
 use thiserror::Error;
 
+pub struct FFmpegCommandSettings<'a> {
+    pub input_path: &'a str,
+    pub output_path: &'a str,
+    pub video_codec: &'a str,
+    pub audio_codec: &'a str,
+    pub quality: &'a str,
+    pub use_hardware_accel: bool,
+    pub is_remux: bool,
+}
+
 #[derive(Error, Debug)]
 pub enum SecurityError {
     #[error("Potential command injection detected in argument: {arg}")]
@@ -174,13 +184,7 @@ impl SecurityValidator {
 
     pub fn build_safe_ffmpeg_command(
         &self,
-        input_path: &str,
-        output_path: &str,
-        video_codec: &str,
-        audio_codec: &str,
-        quality: &str,
-        use_hardware_accel: bool,
-        is_remux: bool,
+        settings: &FFmpegCommandSettings,
     ) -> Result<Vec<String>, SecurityError> {
         let mut args = vec![
             "-nostdin".to_string(),
@@ -193,42 +197,44 @@ impl SecurityValidator {
         ];
 
         // Hardware acceleration (if requested)
-        if use_hardware_accel {
+        if settings.use_hardware_accel {
             args.push("-hwaccel".to_string());
             args.push("auto".to_string());
         }
 
         // Input file
-        self.validate_path(input_path)?;
+        self.validate_path(settings.input_path)?;
         args.push("-i".to_string());
-        args.push(input_path.to_string());
+        args.push(settings.input_path.to_string());
 
         // Codec settings
-        if is_remux {
+        if settings.is_remux {
             args.push("-c".to_string());
             args.push("copy".to_string());
         } else {
             // Validate and add video codec
-            let safe_video_codec = self.sanitize_codec(video_codec)?;
+            let safe_video_codec = self.sanitize_codec(settings.video_codec)?;
             args.push("-c:v".to_string());
             args.push(safe_video_codec);
 
             // Validate and add audio codec
-            let safe_audio_codec = self.sanitize_codec(audio_codec)?;
+            let safe_audio_codec = self.sanitize_codec(settings.audio_codec)?;
             args.push("-c:a".to_string());
             args.push(safe_audio_codec);
 
             // Add quality settings if applicable
-            if !quality.is_empty() && (video_codec.contains("264") || video_codec.contains("265")) {
-                let safe_quality = self.sanitize_quality(quality)?;
+            if !settings.quality.is_empty()
+                && (settings.video_codec.contains("264") || settings.video_codec.contains("265"))
+            {
+                let safe_quality = self.sanitize_quality(settings.quality)?;
                 args.push("-crf".to_string());
                 args.push(safe_quality);
             }
         }
 
         // Output file
-        self.validate_path(output_path)?;
-        args.push(output_path.to_string());
+        self.validate_path(settings.output_path)?;
+        args.push(settings.output_path.to_string());
 
         // Final validation of all arguments
         self.validate_ffmpeg_args(&args)

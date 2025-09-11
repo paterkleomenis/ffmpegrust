@@ -303,17 +303,19 @@ impl ConversionTask {
         let total_frames = self.get_frame_count().await.ok().flatten();
 
         // Build secure FFmpeg command
+        // Build FFmpeg command
+        let command_settings = crate::security::FFmpegCommandSettings {
+            input_path: &self.input,
+            output_path: &self.output,
+            video_codec: &self.settings.video_codec,
+            audio_codec: &self.settings.audio_codec,
+            quality: &self.settings.quality,
+            use_hardware_accel: self.settings.use_hardware_accel,
+            is_remux: self.settings.mode == ConversionMode::Remux,
+        };
         let args = self
             .security_validator
-            .build_safe_ffmpeg_command(
-                &self.input,
-                &self.output,
-                &self.settings.video_codec,
-                &self.settings.audio_codec,
-                &self.settings.quality,
-                self.settings.use_hardware_accel,
-                self.settings.mode == ConversionMode::Remux,
-            )
+            .build_safe_ffmpeg_command(&command_settings)
             .map_err(|e| ConversionError::SecurityError {
                 message: e.to_string(),
             })?;
@@ -418,7 +420,7 @@ impl ConversionTask {
 
                 // Parse progress and send update
                 if let Some(progress) = progress_parser.parse_line(&line) {
-                    let _ = tx.send(ConversionStatus::InProgress(progress));
+                    std::mem::drop(tx.send(ConversionStatus::InProgress(progress)));
                 }
 
                 line.clear();

@@ -226,7 +226,7 @@ impl AutoUpdater {
         Ok(())
     }
 
-    async fn install_update(&self, archive_path: &PathBuf) -> Result<()> {
+    async fn install_update(&self, archive_path: &Path) -> Result<()> {
         let current_exe = std::env::current_exe()
             .map_err(|e| anyhow!("Failed to get current executable path: {}", e))?;
 

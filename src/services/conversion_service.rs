@@ -311,7 +311,7 @@ impl ConversionService {
             }
         }
 
-        self.send_event(AppEvent::ConversionCancelled(task_id));
+        self.send_event(AppEvent::ConversionCancelled(()));
         tracing::info!("Conversion {} cancelled", task_id);
         Ok(())
     }

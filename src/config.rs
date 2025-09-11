@@ -31,6 +31,7 @@ impl Default for AppConfig {
 }
 
 impl AppConfig {
+    #[allow(dead_code)]
     pub fn load() -> Self {
         if let Some(config_path) = Self::config_file_path() {
             if config_path.exists() {
@@ -44,6 +45,7 @@ impl AppConfig {
         Self::default()
     }
 
+    #[allow(dead_code)]
     pub fn save(&self) {
         if let Some(config_path) = Self::config_file_path() {
             if let Some(parent) = config_path.parent() {
@@ -55,16 +57,19 @@ impl AppConfig {
         }
     }
 
+    #[allow(dead_code)]
     fn config_file_path() -> Option<PathBuf> {
         dirs::config_dir().map(|config_dir| config_dir.join("ffmpegrust").join("config.json"))
     }
 
+    #[allow(dead_code)]
     pub fn update_last_input_dir(&mut self, path: &str) {
         if let Some(parent) = std::path::Path::new(path).parent() {
             self.last_input_dir = Some(parent.to_string_lossy().to_string());
         }
     }
 
+    #[allow(dead_code)]
     pub fn update_last_output_dir(&mut self, path: &str) {
         if let Some(parent) = std::path::Path::new(path).parent() {
             self.last_output_dir = Some(parent.to_string_lossy().to_string());
