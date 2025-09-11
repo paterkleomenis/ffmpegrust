@@ -10,7 +10,6 @@ pub struct AppConfig {
     pub default_quality: String,
     pub default_container: String,
     pub use_hardware_accel: bool,
-    pub smart_copy: bool,
     pub window_width: f32,
     pub window_height: f32,
 }
@@ -25,7 +24,6 @@ impl Default for AppConfig {
             default_quality: "23".to_string(),
             default_container: "mp4".to_string(),
             use_hardware_accel: true,
-            smart_copy: true,
             window_width: 700.0,
             window_height: 500.0,
         }
