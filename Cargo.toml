@@ -28,3 +28,8 @@ uuid = { version = "1.0", features = ["v4"] }
 rayon = "1.7"
 async-trait = "0.1"
 rand = "0.8"
+reqwest = { version = "0.11", features = ["json", "stream"] }
+semver = "1.0"
+tempfile = "3.0"
+futures-util = "0.3"
+webbrowser = "0.8"
