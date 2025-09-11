@@ -1,63 +1,126 @@
-// App Constants
-pub const APP_NAME: &str = "FFmpeg Converter Pro";
-pub const APP_VERSION: &str = env!("CARGO_PKG_VERSION");
+pub const UI_UPDATE_INTERVAL_MS: u64 = 250;
+pub const DEFAULT_WINDOW_SIZE: [f32; 2] = [900.0, 700.0];
+pub const MIN_WINDOW_SIZE: [f32; 2] = [800.0, 600.0];
+pub const PROGRESS_BUFFER_SIZE: usize = 1024;
 
-// FFmpeg Constants
+// UI Styling Constants
+pub const HEADER_HEIGHT: f32 = 80.0;
+pub const CARD_PADDING: f32 = 20.0;
+pub const CARD_SPACING: f32 = 15.0;
+pub const CARD_ROUNDING: f32 = 10.0;
+pub const BUTTON_PADDING: [f32; 2] = [12.0, 8.0];
+pub const TAB_BUTTON_PADDING: [f32; 2] = [25.0, 15.0];
+pub const ITEM_SPACING: [f32; 2] = [10.0, 10.0];
+
+// Colors
+pub const WINDOW_BG_COLOR: u8 = 20;
+pub const PANEL_BG_COLOR: u8 = 25;
+pub const CARD_BG_COLOR: u8 = 30;
+pub const CARD_BORDER_COLOR: u8 = 45;
+pub const HEADER_BG_COLOR: u8 = 15;
+
+// Default codec options
+pub const DEFAULT_CODECS: &[(&str, &str)] = &[
+    ("libx264", "H.264 (x264)"),
+    ("libx265", "H.265/HEVC (x265)"),
+    ("libvpx-vp9", "VP9"),
+    ("libaom-av1", "AV1"),
+    ("copy", "Copy (No Re-encoding)"),
+];
+
+pub const AUDIO_CODECS: &[(&str, &str)] = &[
+    ("aac", "AAC"),
+    ("libmp3lame", "MP3"),
+    ("libopus", "Opus"),
+    ("flac", "FLAC"),
+    ("pcm_s16le", "PCM 16-bit (Little Endian)"),
+    ("pcm_s24le", "PCM 24-bit (Little Endian)"),
+    ("pcm_s32le", "PCM 32-bit (Little Endian)"),
+    ("pcm_f32le", "PCM 32-bit Float"),
+    ("pcm_f64le", "PCM 64-bit Float"),
+    ("pcm_s16be", "PCM 16-bit (Big Endian)"),
+    ("pcm_s24be", "PCM 24-bit (Big Endian)"),
+    ("pcm_u8", "PCM 8-bit Unsigned"),
+    ("copy", "Copy (No Re-encoding)"),
+];
+
+pub const CONTAINER_FORMATS: &[(&str, &str)] = &[
+    ("mp4", "MP4"),
+    ("mkv", "MKV"),
+    ("avi", "AVI"),
+    ("mov", "MOV"),
+    ("wav", "WAV"),
+    ("webm", "WebM"),
+    ("flv", "FLV"),
+    ("wmv", "WMV"),
+];
+
+pub const QUALITY_PRESETS: &[(&str, &str)] = &[
+    ("18", "Lossless (18)"),
+    ("20", "Very High (20)"),
+    ("23", "High (23)"),
+    ("26", "Medium (26)"),
+    ("30", "Low (30)"),
+    ("35", "Very Low (35)"),
+];
+
+// FFmpeg process constants
 pub const FFMPEG_TIMEOUT_SECONDS: u64 = 3600; // 1 hour max
 pub const PROGRESS_UPDATE_INTERVAL_MS: u64 = 100;
 pub const CANCELLATION_CHECK_INTERVAL_MS: u64 = 100;
 
-// File handling
+// File extensions for video files
 pub const VIDEO_EXTENSIONS: &[&str] = &[
-    "mp4", "mkv", "avi", "mov", "wmv", "flv", "webm", "m4v", "3gp", "ogv",
+    "mp4", "avi", "mkv", "mov", "wav", "wmv", "flv", "webm", "m4v", "3gp", "ts", "mts", "m2ts",
+    "vob", "ogv",
 ];
 
-// System limits
+// Resource limits
 pub const MAX_CONCURRENT_CONVERSIONS: usize = 2;
 pub const DISK_SPACE_THRESHOLD_MB: u64 = 1024; // 1GB minimum free space
 pub const MAX_LOG_LINES: usize = 1000;
 
-// Remux compatibility - format -> compatible input formats
+// Remux format compatibility matrix
 pub const REMUX_COMPATIBLE_FORMATS: &[(&str, &[&str])] = &[
-    ("mp4", &["h264", "h265", "hevc", "aac", "mp3"]),
-    (
-        "mkv",
-        &[
-            "h264", "h265", "hevc", "vp8", "vp9", "av1", "aac", "mp3", "flac", "opus",
-        ],
-    ),
-    ("webm", &["vp8", "vp9", "av1", "opus", "vorbis"]),
-    ("avi", &["h264", "xvid", "divx", "mp3", "aac"]),
-    ("mov", &["h264", "h265", "hevc", "prores", "aac", "mp3"]),
+    ("mp4", &["mov", "mkv", "avi"]),
+    ("mov", &["mp4", "mkv", "avi"]),
+    ("mkv", &["mp4", "mov", "avi", "webm"]),
+    ("avi", &["mp4", "mov", "mkv"]),
+    ("webm", &["mkv"]),
+    ("flv", &["mp4", "mov"]),
 ];
 
-// Container + Video Codec + Audio Codec recommendations
+// Container-specific codec recommendations
 pub const CONTAINER_CODEC_RECOMMENDATIONS: &[(&str, &[&str], &[&str])] = &[
-    // Container, Video Codecs, Audio Codecs
-    ("mp4", &["libx264", "libx265"], &["aac", "mp3"]),
+    (
+        "mp4",
+        &["libx264", "libx265", "copy"],
+        &["aac", "mp3", "copy"],
+    ),
+    (
+        "mov",
+        &["libx264", "libx265", "prores_ks", "copy"],
+        &["aac", "pcm_s16le", "pcm_s24le", "pcm_s32le", "copy"],
+    ),
     (
         "mkv",
-        &["libx264", "libx265", "libvpx-vp9", "libaom-av1"],
-        &["aac", "mp3", "flac", "libopus"],
+        &["libx264", "libx265", "libvpx-vp9", "copy"],
+        &["aac", "opus", "flac", "pcm_s16le", "pcm_s24le", "copy"],
     ),
     (
-        "webm",
-        &["libvpx-vp8", "libvpx-vp9", "libaom-av1"],
-        &["libopus", "libvorbis"],
+        "wav",
+        &["copy"],
+        &["pcm_s16le", "pcm_s24le", "pcm_s32le", "pcm_f32le", "copy"],
     ),
-    ("avi", &["libx264", "libxvid"], &["mp3", "aac"]),
-    ("mov", &["libx264", "libx265", "prores"], &["aac", "mp3"]),
-    ("flv", &["libx264"], &["aac", "mp3"]),
-    ("3gp", &["libx264"], &["aac"]),
-    ("wmv", &["wmv2"], &["wmav2"]),
-    ("ogv", &["libtheora"], &["libvorbis"]),
-    ("m4v", &["libx264"], &["aac"]),
+    ("webm", &["libvpx-vp9", "copy"], &["libopus", "copy"]),
+    ("avi", &["libx264", "copy"], &["mp3", "pcm_s16le", "copy"]),
 ];
 
-// Quick remux presets
+// Fast remux presets
 pub const REMUX_PRESETS: &[(&str, &str)] = &[
-    ("MP4 Fast", "Fast remux to MP4 container"),
-    ("MKV Universal", "Remux to MKV for maximum compatibility"),
-    ("WebM Web", "Remux to WebM for web use"),
-    ("MOV Apple", "Remux to MOV for Apple devices"),
+    ("Fast MP4", "mp4"),
+    ("Fast MOV", "mov"),
+    ("Fast MKV", "mkv"),
+    ("Fast WebM", "webm"),
+    ("Fast AVI", "avi"),
 ];
