@@ -1,5 +1,4 @@
 use anyhow::{anyhow, Result};
-use reqwest;
 use semver::Version;
 use serde::{Deserialize, Serialize};
 use std::path::PathBuf;
@@ -312,7 +311,7 @@ del "%~f0"
 
         // Use tar to extract
         let output = Command::new("tar")
-            .args(&[
+            .args([
                 "-xzf",
                 &archive_path.to_string_lossy(),
                 "-C",

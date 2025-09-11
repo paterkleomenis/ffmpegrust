@@ -1,4 +1,3 @@
-use crate::security::SecurityValidator;
 use regex::Regex;
 use std::process::Stdio;
 use std::sync::{Arc, Mutex};
@@ -132,16 +131,11 @@ impl Default for ConversionSettings {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize)]
+#[derive(Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize, Default)]
 pub enum ConversionMode {
+    #[default]
     Convert,
     Remux,
-}
-
-impl Default for ConversionMode {
-    fn default() -> Self {
-        ConversionMode::Convert
-    }
 }
 
 #[derive(Debug, Clone)]
@@ -152,7 +146,6 @@ pub struct ConversionTask {
     pub settings: ConversionSettings,
     duration_seconds: Option<f32>,
     cancel_flag: Arc<Mutex<bool>>,
-    security_validator: SecurityValidator,
 }
 
 impl ConversionTask {
@@ -164,7 +157,6 @@ impl ConversionTask {
             settings,
             duration_seconds: None,
             cancel_flag: Arc::new(Mutex::new(false)),
-            security_validator: SecurityValidator::new(),
         }
     }
 
@@ -181,7 +173,6 @@ impl ConversionTask {
             settings,
             duration_seconds: None,
             cancel_flag: Arc::new(Mutex::new(false)),
-            security_validator: SecurityValidator::new(),
         }
     }
 
@@ -204,44 +195,34 @@ impl ConversionTask {
     }
 
     pub fn validate(&self) -> Result<(), ConversionError> {
-        if self.input.is_empty() {
-            return Err(ConversionError::InvalidInput {
-                message: "No input file specified".to_string(),
-            });
-        }
-
+        // Check if input file exists
         if !std::path::Path::new(&self.input).exists() {
             return Err(ConversionError::InvalidInput {
-                message: "Input file does not exist".to_string(),
+                message: format!("Input file does not exist: {}", self.input),
             });
         }
 
-        if self.output.is_empty() {
-            return Err(ConversionError::InvalidInput {
-                message: "No output file specified".to_string(),
-            });
-        }
-
+        // Check if output directory exists
         if let Some(parent) = std::path::Path::new(&self.output).parent() {
             if !parent.exists() {
                 return Err(ConversionError::InvalidInput {
-                    message: "Output directory does not exist".to_string(),
+                    message: format!("Output directory does not exist: {}", parent.display()),
                 });
             }
         }
 
-        // Validate paths with security validator
-        self.security_validator
-            .validate_path(&self.input)
-            .map_err(|e| ConversionError::SecurityError {
-                message: e.to_string(),
-            })?;
+        // Basic path validation
+        if self.input.is_empty() || self.output.is_empty() {
+            return Err(ConversionError::InvalidInput {
+                message: "Input and output paths cannot be empty".to_string(),
+            });
+        }
 
-        self.security_validator
-            .validate_path(&self.output)
-            .map_err(|e| ConversionError::SecurityError {
-                message: e.to_string(),
-            })?;
+        if self.input == self.output {
+            return Err(ConversionError::InvalidInput {
+                message: "Input and output files cannot be the same".to_string(),
+            });
+        }
 
         Ok(())
     }
@@ -307,21 +288,8 @@ impl ConversionTask {
         let _ = self.get_duration().await;
         let total_frames = self.get_frame_count().await.ok().flatten();
 
-        // Build secure FFmpeg command
-        let args = self
-            .security_validator
-            .build_safe_ffmpeg_command(
-                &self.input,
-                &self.output,
-                &self.settings.video_codec,
-                &self.settings.audio_codec,
-                &self.settings.quality,
-                self.settings.use_hardware_accel,
-                self.settings.mode == ConversionMode::Remux,
-            )
-            .map_err(|e| ConversionError::SecurityError {
-                message: e.to_string(),
-            })?;
+        // Build FFmpeg command
+        let args = self.build_ffmpeg_command();
 
         let (tx, rx) = tokio::sync::mpsc::channel(100);
         let duration = self.duration_seconds;
@@ -503,6 +471,51 @@ struct ProgressParser {
     speed_regex: Regex,
     bitrate_regex: Regex,
     size_regex: Regex,
+}
+
+impl ConversionTask {
+    fn build_ffmpeg_command(&self) -> Vec<String> {
+        let mut args = vec![
+            "-nostdin".to_string(),
+            "-y".to_string(), // overwrite output files
+            "-i".to_string(),
+            self.input.clone(),
+        ];
+
+        if self.settings.mode == ConversionMode::Convert {
+            // Video codec
+            if self.settings.video_codec != "copy" {
+                args.extend(["-c:v".to_string(), self.settings.video_codec.clone()]);
+
+                if self.settings.video_codec.contains("264")
+                    || self.settings.video_codec.contains("265")
+                {
+                    args.extend(["-crf".to_string(), self.settings.quality.clone()]);
+                }
+            } else {
+                args.extend(["-c:v".to_string(), "copy".to_string()]);
+            }
+
+            // Audio codec
+            if self.settings.audio_codec != "copy" {
+                args.extend(["-c:a".to_string(), self.settings.audio_codec.clone()]);
+            } else {
+                args.extend(["-c:a".to_string(), "copy".to_string()]);
+            }
+
+            // Hardware acceleration
+            if self.settings.use_hardware_accel {
+                args.insert(1, "-hwaccel".to_string());
+                args.insert(2, "auto".to_string());
+            }
+        } else {
+            // Remux mode - copy streams
+            args.extend(["-c".to_string(), "copy".to_string()]);
+        }
+
+        args.push(self.output.clone());
+        args
+    }
 }
 
 impl ProgressParser {

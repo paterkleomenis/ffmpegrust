@@ -219,7 +219,7 @@ impl FFmpegInstaller {
                 let command = if *pm == "apt" {
                     // Special handling for apt update && apt install
                     Command::new("sh")
-                        .args(&["-c", "apt update && apt install -y ffmpeg"])
+                        .args(["-c", "apt update && apt install -y ffmpeg"])
                         .output()
                 } else {
                     Command::new(*pm).args(args).output()
@@ -304,7 +304,7 @@ impl FFmpegInstaller {
         let mut capabilities = FFmpegCapabilities::default();
 
         // Check for hardware acceleration support
-        if let Ok(output) = Command::new("ffmpeg").args(&["-encoders"]).output() {
+        if let Ok(output) = Command::new("ffmpeg").args(["-encoders"]).output() {
             let stdout = String::from_utf8_lossy(&output.stdout);
             capabilities.has_nvenc = stdout.contains("h264_nvenc") || stdout.contains("hevc_nvenc");
             capabilities.has_qsv = stdout.contains("h264_qsv") || stdout.contains("hevc_qsv");
@@ -314,7 +314,7 @@ impl FFmpegInstaller {
         }
 
         // Check for common formats
-        if let Ok(output) = Command::new("ffmpeg").args(&["-formats"]).output() {
+        if let Ok(output) = Command::new("ffmpeg").args(["-formats"]).output() {
             let stdout = String::from_utf8_lossy(&output.stdout);
             capabilities.supports_mp4 = stdout.contains("mp4");
             capabilities.supports_mkv = stdout.contains("matroska");

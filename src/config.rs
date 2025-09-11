@@ -56,11 +56,7 @@ impl AppConfig {
     }
 
     fn config_file_path() -> Option<PathBuf> {
-        if let Some(config_dir) = dirs::config_dir() {
-            Some(config_dir.join("ffmpegrust").join("config.json"))
-        } else {
-            None
-        }
+        dirs::config_dir().map(|config_dir| config_dir.join("ffmpegrust").join("config.json"))
     }
 
     pub fn update_last_input_dir(&mut self, path: &str) {
