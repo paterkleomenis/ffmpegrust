@@ -33,3 +33,6 @@ semver = "1.0"
 tempfile = "3.0"
 futures-util = "0.3"
 webbrowser = "0.8"
+
+[target.'cfg(windows)'.dependencies]
+winapi = { version = "0.3", features = ["winuser", "shellapi", "processthreadsapi"] }
