@@ -1,45 +1,37 @@
+use std::sync::Arc;
 use tokio::runtime::Runtime;
 
 mod app;
 mod config;
-mod constants;
 mod conversion;
-mod events;
-mod ffmpeg_installer;
 mod presets;
-mod security;
-mod services;
-mod state;
 mod updater;
+mod utils;
 
-// Window constants now defined inline
 use app::FFmpegApp;
 
-fn main() -> Result<(), eframe::Error> {
-    // Initialize tracing
-    tracing_subscriber::fmt::init();
+fn main() -> Result<(), Box<dyn std::error::Error>> {
+    // Create async runtime
+    let runtime = Arc::new(Runtime::new()?);
 
-    tracing::info!("Starting FFmpeg Converter Pro");
-
-    // Create tokio runtime for async operations
-    let _rt = Runtime::new().expect("Failed to create async runtime");
-
+    // Setup GUI options
     let options = eframe::NativeOptions {
         viewport: egui::ViewportBuilder::default()
-            .with_inner_size([1400.0, 900.0])
-            .with_min_inner_size([1200.0, 700.0])
-            .with_title("FFmpeg Pro - Video Conversion Studio")
-            .with_resizable(true)
-            .with_maximize_button(true),
+            .with_inner_size([1000.0, 600.0])
+            .with_min_inner_size([800.0, 500.0])
+            .with_title("FFmpeg Rust")
+            .with_resizable(true),
+        centered: true,
+        follow_system_theme: false,
+        default_theme: eframe::Theme::Dark,
         ..Default::default()
     };
 
-    // Create the application with the async runtime
-    let app_creator =
-        move |_cc: &eframe::CreationContext| -> Box<dyn eframe::App> { Box::new(FFmpegApp::new()) };
-
-    let result = eframe::run_native("FFmpeg Pro", options, Box::new(app_creator));
-
-    tracing::info!("Application shutting down");
-    result
+    // Run the application
+    eframe::run_native(
+        "FFmpeg Rust",
+        options,
+        Box::new(|_cc| Box::new(FFmpegApp::new(runtime))),
+    )
+    .map_err(|e| Box::new(e) as Box<dyn std::error::Error>)
 }

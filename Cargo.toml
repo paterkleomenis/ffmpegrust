@@ -3,36 +3,21 @@ name = "ffmpegrust"
 version = "1.0.0"
 edition = "2021"
 authors = ["Your Name <your.email@example.com>"]
-description = "A modern, professional GUI application for video conversion and remuxing using FFmpeg"
-repository = "https://github.com/yourusername/ffmpegrust"
+description = "A simple, minimalistic GUI for video conversion and remuxing using FFmpeg"
 license = "MIT"
-keywords = ["ffmpeg", "video", "conversion", "gui", "multimedia"]
-categories = ["multimedia::video", "gui"]
-readme = "README.md"
 
 [dependencies]
 eframe = { version = "0.25", features = ["default"] }
 egui = "0.25"
 rfd = "0.12"
-anyhow = "1.0"
-regex = "1.0"
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
 dirs = "5.0"
-thiserror = "1.0"
-tokio = { version = "1.0", features = ["rt-multi-thread", "process", "fs", "sync", "io-util", "time"] }
-tracing = "0.1"
-tracing-subscriber = "0.3"
-infer = "0.15"
-uuid = { version = "1.0", features = ["v4"] }
-rayon = "1.7"
-async-trait = "0.1"
-rand = "0.8"
+tokio = { version = "1.0", features = ["rt-multi-thread", "process", "time", "fs", "io-util"] }
+regex = "1.0"
 reqwest = { version = "0.11", features = ["json", "stream"] }
 semver = "1.0"
-tempfile = "3.0"
 futures-util = "0.3"
-webbrowser = "0.8"
 
 [target.'cfg(windows)'.dependencies]
-winapi = { version = "0.3", features = ["winuser", "shellapi", "processthreadsapi", "wingdi", "windef", "minwindef", "libloaderapi", "errhandlingapi"] }
+winapi = { version = "0.3", features = ["winuser", "shellapi"] }

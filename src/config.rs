@@ -1,78 +1,65 @@
 use serde::{Deserialize, Serialize};
 use std::path::PathBuf;
 
-#[derive(Serialize, Deserialize, Clone)]
-pub struct AppConfig {
-    pub last_input_dir: Option<String>,
-    pub last_output_dir: Option<String>,
-    pub default_video_codec: String,
-    pub default_audio_codec: String,
-    pub default_quality: String,
-    pub default_container: String,
-    pub use_hardware_accel: bool,
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct Config {
+    pub last_input_folder: Option<PathBuf>,
+    pub last_output_folder: Option<PathBuf>,
+    pub auto_check_updates: bool,
     pub window_width: f32,
     pub window_height: f32,
 }
 
-impl Default for AppConfig {
+impl Default for Config {
     fn default() -> Self {
         Self {
-            last_input_dir: None,
-            last_output_dir: None,
-            default_video_codec: "libx264".to_string(),
-            default_audio_codec: "aac".to_string(),
-            default_quality: "23".to_string(),
-            default_container: "mp4".to_string(),
-            use_hardware_accel: true,
-            window_width: 700.0,
-            window_height: 500.0,
+            last_input_folder: None,
+            last_output_folder: None,
+            auto_check_updates: true,
+            window_width: 1000.0,
+            window_height: 600.0,
         }
     }
 }
 
-impl AppConfig {
-    #[allow(dead_code)]
+impl Config {
     pub fn load() -> Self {
-        if let Some(config_path) = Self::config_file_path() {
+        if let Some(config_dir) = dirs::config_dir() {
+            let config_path = config_dir.join("ffmpegrust").join("config.json");
+
             if config_path.exists() {
-                if let Ok(config_data) = std::fs::read_to_string(&config_path) {
-                    if let Ok(config) = serde_json::from_str(&config_data) {
+                if let Ok(content) = std::fs::read_to_string(&config_path) {
+                    if let Ok(config) = serde_json::from_str::<Config>(&content) {
                         return config;
                     }
                 }
             }
         }
+
         Self::default()
     }
 
-    #[allow(dead_code)]
     pub fn save(&self) {
-        if let Some(config_path) = Self::config_file_path() {
-            if let Some(parent) = config_path.parent() {
-                let _ = std::fs::create_dir_all(parent);
+        if let Some(config_dir) = dirs::config_dir() {
+            let app_config_dir = config_dir.join("ffmpegrust");
+
+            if let Ok(()) = std::fs::create_dir_all(&app_config_dir) {
+                let config_path = app_config_dir.join("config.json");
+
+                if let Ok(content) = serde_json::to_string_pretty(self) {
+                    let _ = std::fs::write(&config_path, content);
+                }
             }
-            if let Ok(config_data) = serde_json::to_string_pretty(self) {
-                let _ = std::fs::write(&config_path, config_data);
-            }
         }
     }
 
-    #[allow(dead_code)]
-    fn config_file_path() -> Option<PathBuf> {
-        dirs::config_dir().map(|config_dir| config_dir.join("ffmpegrust").join("config.json"))
+    pub fn update_input_folder(&mut self, path: Option<PathBuf>) {
+        self.last_input_folder = path;
+        self.save();
     }
 
-    #[allow(dead_code)]
-    pub fn update_last_input_dir(&mut self, path: &str) {
-        if let Some(parent) = std::path::Path::new(path).parent() {
-            self.last_input_dir = Some(parent.to_string_lossy().to_string());
-        }
-    }
-
-    #[allow(dead_code)]
-    pub fn update_last_output_dir(&mut self, path: &str) {
-        if let Some(parent) = std::path::Path::new(path).parent() {
-            self.last_output_dir = Some(parent.to_string_lossy().to_string());
-        }
+    pub fn update_output_folder(&mut self, path: Option<PathBuf>) {
+        self.last_output_folder = path;
+        self.save();
     }
 }
