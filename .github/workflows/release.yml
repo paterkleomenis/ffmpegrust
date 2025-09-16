@@ -92,18 +92,11 @@ jobs:
         shell: cmd
         run: |
           copy target\${{ matrix.target }}\release\ffmpegrust.exe release-files\
-          copy README.md release-files\
-          echo @echo off > release-files\run.bat
-          echo ffmpegrust.exe >> release-files\run.bat
 
       - name: Copy files (Unix)
         if: matrix.os != 'windows-latest'
         run: |
           cp target/${{ matrix.target }}/release/ffmpegrust release-files/
-          cp README.md release-files/
-          echo '#!/bin/bash' > release-files/run.sh
-          echo './ffmpegrust' >> release-files/run.sh
-          chmod +x release-files/run.sh
           chmod +x release-files/ffmpegrust
 
       - name: Verify release files
@@ -179,7 +172,7 @@ jobs:
             ### Installation
             1. Download the appropriate file for your platform
             2. Extract the archive
-            3. Run the executable or use the provided run script
+            3. Run the executable directly
 
             ### Requirements
             **FFmpeg must be installed** on your system:
