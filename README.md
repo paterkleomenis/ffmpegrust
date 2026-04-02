@@ -1,11 +1,12 @@
 # FFmpeg Rust
 
-A simple, minimalistic GUI for video conversion and remuxing using FFmpeg.
+A modern desktop GUI for high-speed video conversion and remuxing with FFmpeg.
 
 ## Features
 
 - **File Selection**: Easy input file selection with folder memory
 - **Output Management**: Choose output folder with automatic path remembering
+- **Radical UI Refresh**: Two-column studio layout, stronger visual hierarchy, and cleaner workflow
 - **Conversion Modes**:
   - **Convert**: Full video/audio conversion with codec selection
   - **Remux**: Container format change without re-encoding
@@ -34,7 +35,7 @@ A simple, minimalistic GUI for video conversion and remuxing using FFmpeg.
 1. Install [Rust](https://rustup.rs/) if you haven't already
 2. Clone this repository:
    ```bash
-   git clone https://github.com/yourusername/ffmpegrust.git
+   git clone https://github.com/paterkleomenis/ffmpegrust.git
    cd ffmpegrust
    ```
 3. Build and run:
@@ -108,7 +109,7 @@ Access the Help menu to:
 ## Building
 
 ### Dependencies
-- Rust 1.70 or later
+- Rust 1.85 or later (Rust 2024 edition)
 - FFmpeg (for runtime functionality)
 
 ### Build Commands

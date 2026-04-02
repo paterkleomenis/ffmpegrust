@@ -1,21 +1,21 @@
 [package]
 name = "ffmpegrust"
 version = "1.0.0"
-edition = "2021"
+edition = "2024"
 authors = ["Your Name <your.email@example.com>"]
 description = "A simple, minimalistic GUI for video conversion and remuxing using FFmpeg"
 license = "MIT"
 
 [dependencies]
-eframe = { version = "0.25", features = ["default"] }
-egui = "0.25"
-rfd = "0.12"
+eframe = { version = "0.33", features = ["default"] }
+egui = "0.33"
+rfd = "0.15"
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
-dirs = "5.0"
-tokio = { version = "1.0", features = ["rt-multi-thread", "process", "time", "fs", "io-util"] }
-regex = "1.0"
-reqwest = { version = "0.11", features = ["json", "stream"] }
+dirs = "6.0"
+tokio = { version = "1.47", features = ["rt-multi-thread", "process", "time", "fs", "io-util"] }
+regex = "1.11"
+reqwest = { version = "0.12", default-features = false, features = ["json", "stream", "rustls-tls"] }
 semver = "1.0"
 futures-util = "0.3"
 
